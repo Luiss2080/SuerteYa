@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Trash2, GripVertical, List } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, Trash2, GripVertical, Download, Upload } from 'lucide-react';
 
 const PREDEFINED_LISTS = {
   comida: ['Pizza', 'Sushi', 'Hamburguesa', 'Ensalada', 'Tacos', 'Pasta'],
@@ -9,6 +9,7 @@ const PREDEFINED_LISTS = {
 
 const OptionsManager = ({ options, setOptions, isSpinning }) => {
   const [newOption, setNewOption] = useState('');
+  const fileInputRef = useRef(null);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -35,6 +36,32 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
     setOptions(PREDEFINED_LISTS[key]);
   };
 
+  const exportCSV = () => {
+    const csvContent = options.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'ruleta-opciones.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const importCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const text = evt.target.result;
+      const parsedOpts = text.split(/\r?\n/).map(o => o.trim()).filter(Boolean);
+      const uniqueOpts = Array.from(new Set([...options, ...parsedOpts]));
+      setOptions(uniqueOpts);
+    };
+    reader.readAsText(file);
+    e.target.value = null; // reset input
+  };
+
   return (
     <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '600px' }}>
       <h2 style={{ marginBottom: '1rem', fontSize: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -51,6 +78,15 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
             <option value="peliculas">Género de Película</option>
             <option value="quien_paga">¿Quién paga?</option>
           </select>
+          <button onClick={() => fileInputRef.current.click()} className="btn btn-icon" title="Importar CSV" disabled={isSpinning}>
+            <Upload size={18} />
+          </button>
+          <input type="file" accept=".csv,.txt" ref={fileInputRef} onChange={importCSV} style={{ display: 'none' }} />
+          
+          <button onClick={exportCSV} className="btn btn-icon" title="Exportar CSV" disabled={options.length === 0 || isSpinning}>
+            <Download size={18} />
+          </button>
+
           {options.length > 0 && (
             <button onClick={clearAll} className="btn btn-icon" title="Borrar todo" disabled={isSpinning}>
               <Trash2 size={18} />
@@ -113,3 +149,4 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
 };
 
 export default OptionsManager;
+

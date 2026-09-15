@@ -10,12 +10,16 @@ function App() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [theme, setTheme] = useState('neon');
+  const [drawMode, setDrawMode] = useState(false); // Sorteo mode
+  const [history, setHistory] = useState([]);
   
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isVictoryOpen, setIsVictoryOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Initialize from URL or localStorage
   useEffect(() => {
@@ -44,6 +48,14 @@ function App() {
     const savedSound = localStorage.getItem('ruleta:sound');
     if (savedSound !== null) setSoundEnabled(savedSound === 'true');
 
+    const savedDrawMode = localStorage.getItem('ruleta:drawMode');
+    if (savedDrawMode !== null) setDrawMode(savedDrawMode === 'true');
+
+    const savedHistory = localStorage.getItem('ruleta:history');
+    if (savedHistory) {
+      try { setHistory(JSON.parse(savedHistory)); } catch (e) {}
+    }
+
     const savedTheme = localStorage.getItem('ruleta:theme');
     if (savedTheme) {
       setTheme(savedTheme);
@@ -60,17 +72,37 @@ function App() {
     if (isLoaded) {
       localStorage.setItem('ruleta:options', JSON.stringify(options));
       localStorage.setItem('ruleta:sound', soundEnabled.toString());
+      localStorage.setItem('ruleta:drawMode', drawMode.toString());
       localStorage.setItem('ruleta:theme', theme);
+      localStorage.setItem('ruleta:history', JSON.stringify(history));
       document.body.setAttribute('data-theme', theme);
     }
-  }, [options, soundEnabled, theme, isLoaded]);
+  }, [options, soundEnabled, theme, drawMode, history, isLoaded]);
 
   const handleResult = (winner) => {
     if (winner) {
       setResult(winner);
       setIsVictoryOpen(true);
+      setHistory(prev => {
+        const newHistory = [winner, ...prev].slice(0, 10);
+        return newHistory;
+      });
     } else {
       setResult(null);
+    }
+  };
+
+  const handleVictoryClose = () => {
+    setIsVictoryOpen(false);
+    if (drawMode && result) {
+      // Eliminate the winner from options
+      setOptions(prev => prev.filter(opt => opt !== result));
+    }
+  };
+
+  const clearHistory = () => {
+    if (confirm('¿Seguro que quieres borrar el historial?')) {
+      setHistory([]);
     }
   };
 
@@ -79,6 +111,7 @@ function App() {
       <Navbar 
         onOpenHelp={() => setIsHelpOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenHistory={() => setIsHistoryOpen(true)}
         options={options}
       />
 
@@ -101,17 +134,38 @@ function App() {
       </main>
       
       {/* Modals */}
-      <Modal isOpen={isVictoryOpen} onClose={() => setIsVictoryOpen(false)} title="¡Tenemos un Ganador!">
+      <Modal isOpen={isVictoryOpen} onClose={handleVictoryClose} title="¡Tenemos un Ganador!">
         <div style={{ textAlign: 'center' }}>
           <div className="victory-text fade-in">{result}</div>
-          <button className="btn btn-primary" onClick={() => setIsVictoryOpen(false)}>¡Genial!</button>
+          <button className="btn btn-primary" onClick={handleVictoryClose}>
+            {drawMode ? '¡Genial! (Eliminar opción)' : '¡Genial!'}
+          </button>
         </div>
+      </Modal>
+
+      <Modal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} title="Historial de Resultados">
+        {history.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>No hay resultados aún.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {history.map((item, idx) => (
+              <div key={idx} style={{ padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                <span style={{ color: 'var(--text-muted)', marginRight: '1rem' }}>#{history.length - idx}</span>
+                <strong>{item}</strong>
+              </div>
+            ))}
+            <button className="btn btn-secondary" onClick={clearHistory} style={{ marginTop: '1rem' }}>Borrar Historial</button>
+          </div>
+        )}
       </Modal>
 
       <Modal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} title="Manual de Uso">
         <h3>¿Cómo usar la Ruleta?</h3>
         <p>Añade opciones en el panel lateral o elige una de las <strong>plantillas predefinidas</strong>. Cuando estés listo, pulsa "Girar Ruleta".</p>
         
+        <h3>Modo Sorteo</h3>
+        <p>Actívalo en Configuración. Cuando esté activo, la opción ganadora desaparecerá de la lista automáticamente para no volver a salir.</p>
+
         <h3>Compartir y Guardar</h3>
         <ul>
           <li><strong>Compartir:</strong> Usa el icono de compartir en la barra superior. Se generará un enlace único con tus opciones exactas para enviar a amigos.</li>
@@ -134,6 +188,19 @@ function App() {
           </select>
         </div>
 
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div>
+            <span style={{ display: 'block' }}>Modo Sorteo</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Elimina al ganador automáticamente</span>
+          </div>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => setDrawMode(!drawMode)}
+          >
+            {drawMode ? '✅ Activado' : '❌ Desactivado'}
+          </button>
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>Sonidos y Efectos WebAudio</span>
           <button 
@@ -143,9 +210,6 @@ function App() {
             {soundEnabled ? '🔊 Activado' : '🔇 Silenciado'}
           </button>
         </div>
-        <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          El sonido funciona nativamente mediante la API Web Audio de tu navegador.
-        </p>
       </Modal>
     </>
   )

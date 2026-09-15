@@ -11,9 +11,11 @@ function App() {
   const [result, setResult] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [theme, setTheme] = useState('neon');
   
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isVictoryOpen, setIsVictoryOpen] = useState(false);
 
   // Initialize from URL or localStorage
   useEffect(() => {
@@ -41,6 +43,14 @@ function App() {
     
     const savedSound = localStorage.getItem('ruleta:sound');
     if (savedSound !== null) setSoundEnabled(savedSound === 'true');
+
+    const savedTheme = localStorage.getItem('ruleta:theme');
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.body.setAttribute('data-theme', savedTheme);
+    } else {
+      document.body.setAttribute('data-theme', 'neon');
+    }
     
     setIsLoaded(true);
   }, []);
@@ -50,8 +60,19 @@ function App() {
     if (isLoaded) {
       localStorage.setItem('ruleta:options', JSON.stringify(options));
       localStorage.setItem('ruleta:sound', soundEnabled.toString());
+      localStorage.setItem('ruleta:theme', theme);
+      document.body.setAttribute('data-theme', theme);
     }
-  }, [options, soundEnabled, isLoaded]);
+  }, [options, soundEnabled, theme, isLoaded]);
+
+  const handleResult = (winner) => {
+    if (winner) {
+      setResult(winner);
+      setIsVictoryOpen(true);
+    } else {
+      setResult(null);
+    }
+  };
 
   return (
     <>
@@ -73,16 +94,20 @@ function App() {
             options={options} 
             isSpinning={isSpinning}
             setIsSpinning={setIsSpinning}
-            onResult={setResult}
+            onResult={handleResult}
             soundEnabled={soundEnabled}
           />
-
-          <div className="result-display fade-in" style={{ marginTop: '2rem' }}>
-            {result ? `¡Ha ganado: ${result}! 🎉` : (isSpinning ? '...' : '')}
-          </div>
         </div>
       </main>
       
+      {/* Modals */}
+      <Modal isOpen={isVictoryOpen} onClose={() => setIsVictoryOpen(false)} title="¡Tenemos un Ganador!">
+        <div style={{ textAlign: 'center' }}>
+          <div className="victory-text fade-in">{result}</div>
+          <button className="btn btn-primary" onClick={() => setIsVictoryOpen(false)}>¡Genial!</button>
+        </div>
+      </Modal>
+
       <Modal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} title="Manual de Uso">
         <h3>¿Cómo usar la Ruleta?</h3>
         <p>Añade opciones en el panel lateral o elige una de las <strong>plantillas predefinidas</strong>. Cuando estés listo, pulsa "Girar Ruleta".</p>
@@ -95,6 +120,20 @@ function App() {
       </Modal>
 
       <Modal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title="Configuración">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <span>Tema Visual</span>
+          <select 
+            className="input-field" 
+            style={{ width: 'auto' }}
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+          >
+            <option value="neon">Neon Cyberpunk</option>
+            <option value="candy">Sunset Candy</option>
+            <option value="minimalist">Dark Minimalist</option>
+          </select>
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>Sonidos y Efectos WebAudio</span>
           <button 

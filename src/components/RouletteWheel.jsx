@@ -130,14 +130,7 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
     
     ctx.restore();
 
-    // Draw center indicator/pointer
-    ctx.beginPath();
-    ctx.moveTo(canvas.width - 20, centerY);
-    ctx.lineTo(canvas.width, centerY - 15);
-    ctx.lineTo(canvas.width, centerY + 15);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.shadowBlur = 0;
+    // Pointer is now drawn with HTML/CSS instead of Canvas to allow animation
   };
 
   const spin = () => {
@@ -181,10 +174,11 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
         if (soundEnabled) playWinSound();
         
         confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#ff007f', '#00f2fe', '#f9d423']
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.5 },
+          colors: ['#ff007f', '#00f2fe', '#f9d423'],
+          zIndex: 2000
         });
       }
     };
@@ -194,12 +188,15 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
 
   return (
     <div className="wheel-container glass-panel" style={{ padding: '2rem', position: 'relative' }}>
-      <canvas 
-        ref={canvasRef} 
-        width={400} 
-        height={400}
-        style={{ maxWidth: '100%', height: 'auto' }}
-      />
+      <div style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
+        <canvas 
+          ref={canvasRef} 
+          width={400} 
+          height={400}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+        />
+        <div className={`wheel-pointer ${isSpinning ? 'is-spinning' : ''}`}></div>
+      </div>
       
       <button 
         className="btn btn-primary" 

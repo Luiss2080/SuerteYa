@@ -53,7 +53,7 @@ const playWinSound = () => {
   } catch (e) { console.error('Audio play failed', e) }
 };
 
-const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult }) => {
+const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnabled = true }) => {
   const canvasRef = useRef(null);
   const [rotation, setRotation] = useState(0);
   const lastTickAngleRef = useRef(0);
@@ -165,7 +165,7 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult }) => {
 
       // Check if we passed a segment boundary to play tick
       if (currentRotation - lastTickAngleRef.current >= arcSize) {
-        playTickSound();
+        if (soundEnabled) playTickSound();
         lastTickAngleRef.current = currentRotation - ((currentRotation - lastTickAngleRef.current) % arcSize);
       }
 
@@ -178,7 +178,7 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult }) => {
         
         const winner = options[index];
         onResult(winner);
-        playWinSound();
+        if (soundEnabled) playWinSound();
         
         confetti({
           particleCount: 100,

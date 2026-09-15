@@ -14,6 +14,7 @@ function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [theme, setTheme] = useState('neon');
   const [drawMode, setDrawMode] = useState(false); // Sorteo mode
+  const [spinSpeed, setSpinSpeed] = useState('4000'); // Velocidad de giro
   const [history, setHistory] = useState([]);
   
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -50,6 +51,9 @@ function App() {
 
     const savedDrawMode = localStorage.getItem('ruleta:drawMode');
     if (savedDrawMode !== null) setDrawMode(savedDrawMode === 'true');
+    
+    const savedSpinSpeed = localStorage.getItem('ruleta:spinSpeed');
+    if (savedSpinSpeed !== null) setSpinSpeed(savedSpinSpeed);
 
     const savedHistory = localStorage.getItem('ruleta:history');
     if (savedHistory) {
@@ -73,11 +77,12 @@ function App() {
       localStorage.setItem('ruleta:options', JSON.stringify(options));
       localStorage.setItem('ruleta:sound', soundEnabled.toString());
       localStorage.setItem('ruleta:drawMode', drawMode.toString());
+      localStorage.setItem('ruleta:spinSpeed', spinSpeed.toString());
       localStorage.setItem('ruleta:theme', theme);
       localStorage.setItem('ruleta:history', JSON.stringify(history));
       document.body.setAttribute('data-theme', theme);
     }
-  }, [options, soundEnabled, theme, drawMode, history, isLoaded]);
+  }, [options, soundEnabled, theme, drawMode, spinSpeed, history, isLoaded]);
 
   const handleResult = (winner) => {
     if (winner) {
@@ -129,6 +134,7 @@ function App() {
             setIsSpinning={setIsSpinning}
             onResult={handleResult}
             soundEnabled={soundEnabled}
+            spinSpeed={parseInt(spinSpeed, 10)}
           />
         </div>
       </main>
@@ -185,6 +191,20 @@ function App() {
             <option value="neon">Neon Cyberpunk</option>
             <option value="candy">Sunset Candy</option>
             <option value="minimalist">Dark Minimalist</option>
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <span>Duración de Giro</span>
+          <select 
+            className="input-field" 
+            style={{ width: 'auto' }}
+            value={spinSpeed}
+            onChange={(e) => setSpinSpeed(e.target.value)}
+          >
+            <option value="2000">Rápido (2s)</option>
+            <option value="4000">Normal (4s)</option>
+            <option value="8000">Lento (8s)</option>
           </select>
         </div>
 

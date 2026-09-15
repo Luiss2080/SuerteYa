@@ -1,9 +1,62 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
+
+const playTickSound = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.05);
+    
+    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+    
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.05);
+  } catch (e) { console.error('Audio play failed', e) }
+};
+
+const playWinSound = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    
+    // Play a major chord
+    const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    
+    frequencies.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+      
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      
+      osc.start(ctx.currentTime + i * 0.1);
+      osc.stop(ctx.currentTime + 2);
+    });
+  } catch (e) { console.error('Audio play failed', e) }
+};
 
 const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult }) => {
   const canvasRef = useRef(null);
   const [rotation, setRotation] = useState(0);
+  const lastTickAngleRef = useRef(0);
 
   const colors = [
     '#ff007f', '#00f2fe', '#f9d423', '#b224ef', 
@@ -95,8 +148,10 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult }) => {
     const spinDuration = 4000;
     const spins = 5 + Math.random() * 5; 
     const targetAngle = rotation + (spins * 2 * Math.PI);
+    const arcSize = (2 * Math.PI) / options.length;
     
     const startTime = performance.now();
+    lastTickAngleRef.current = rotation;
 
     const animate = (time) => {
       const elapsed = time - startTime;
@@ -108,20 +163,22 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult }) => {
       
       setRotation(currentRotation);
 
+      // Check if we passed a segment boundary to play tick
+      if (currentRotation - lastTickAngleRef.current >= arcSize) {
+        playTickSound();
+        lastTickAngleRef.current = currentRotation - ((currentRotation - lastTickAngleRef.current) % arcSize);
+      }
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
         setIsSpinning(false);
-        const arcSize = (2 * Math.PI) / options.length;
-        // Adjust for canvas rotation. The pointer is at 0 radians (right side).
-        // Since we rotate the wheel clockwise, we need to find which slice is at 0.
-        // We normalize the rotation to be between 0 and 2*PI.
-        // Because rotation is clockwise, the top slices have moved down.
         const normalizedRotation = currentRotation % (2 * Math.PI);
         const index = Math.floor(((2 * Math.PI) - normalizedRotation) / arcSize) % options.length;
         
         const winner = options[index];
         onResult(winner);
+        playWinSound();
         
         confetti({
           particleCount: 100,

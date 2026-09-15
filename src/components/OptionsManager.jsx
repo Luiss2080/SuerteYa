@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Trash2, GripVertical, List } from 'lucide-react';
+
+const PREDEFINED_LISTS = {
+  comida: ['Pizza', 'Sushi', 'Hamburguesa', 'Ensalada', 'Tacos', 'Pasta'],
+  peliculas: ['Acción', 'Comedia', 'Terror', 'Ciencia Ficción', 'Drama', 'Animación'],
+  quien_paga: ['Yo', 'Tú', 'A medias', 'El que pierda a piedra papel o tijera']
+};
 
 const OptionsManager = ({ options, setOptions, isSpinning }) => {
   const [newOption, setNewOption] = useState('');
@@ -25,20 +31,32 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
     }
   };
 
+  const loadPredefined = (key) => {
+    setOptions(PREDEFINED_LISTS[key]);
+  };
+
   return (
     <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '600px' }}>
       <h2 style={{ marginBottom: '1rem', fontSize: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         Opciones ({options.length})
-        {options.length > 0 && (
-          <button 
-            onClick={clearAll} 
-            className="btn btn-icon" 
-            title="Borrar todo"
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <select 
+            onChange={(e) => { if(e.target.value) loadPredefined(e.target.value); e.target.value = ""; }}
+            className="input-field"
+            style={{ padding: '4px 8px', width: 'auto', fontSize: '0.9rem' }}
             disabled={isSpinning}
           >
-            <Trash2 size={18} />
-          </button>
-        )}
+            <option value="">+ Plantillas</option>
+            <option value="comida">¿Qué comemos?</option>
+            <option value="peliculas">Género de Película</option>
+            <option value="quien_paga">¿Quién paga?</option>
+          </select>
+          {options.length > 0 && (
+            <button onClick={clearAll} className="btn btn-icon" title="Borrar todo" disabled={isSpinning}>
+              <Trash2 size={18} />
+            </button>
+          )}
+        </div>
       </h2>
 
       <form onSubmit={handleAdd} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>

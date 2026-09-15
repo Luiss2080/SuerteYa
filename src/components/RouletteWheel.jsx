@@ -55,13 +55,19 @@ const playWinSound = () => {
 
 const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnabled = true }) => {
   const canvasRef = useRef(null);
-  const [rotation, setRotation] = useState(0);
-  const lastTickAngleRef = useRef(0);
+      gainNode.connect(audioCtxRef.current.destination);
+      
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    };
 
-  const colors = [
-    '#ff007f', '#00f2fe', '#f9d423', '#b224ef', 
-    '#ff4e50', '#fc913a', '#4a4e4d', '#0e9aa7'
-  ];
+    const now = audioCtxRef.current.currentTime;
+    // C Major Chord Arpeggio
+    playNote(523.25, now, 1);       // C5
+    playNote(659.25, now + 0.1, 1); // E5
+    playNote(783.99, now + 0.2, 1); // G5
+    playNote(1046.50, now + 0.3, 1.5); // C6
+  };
 
   useEffect(() => {
     drawWheel();
@@ -73,60 +79,66 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
     const ctx = canvas.getContext('2d');
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 10;
+    const radius = Math.min(centerX, centerY) - 20;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    
     if (options.length === 0) {
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
       ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-      ctx.stroke();
-      
-      ctx.fillStyle = '#a0a0b0';
-      ctx.font = '20px Outfit';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Añade opciones', centerX, centerY);
       return;
     }
 
     const arcSize = (2 * Math.PI) / options.length;
+    const computedStyle = getComputedStyle(document.body);
+    const colorPops = [
+      computedStyle.getPropertyValue('--accent-1').trim(),
+      computedStyle.getPropertyValue('--accent-2').trim(),
+      computedStyle.getPropertyValue('--accent-3').trim(),
+      computedStyle.getPropertyValue('--accent-4').trim()
+    ];
 
     ctx.save();
     ctx.translate(centerX, centerY);
     ctx.rotate(rotation);
-    ctx.translate(-centerX, -centerY);
 
     for (let i = 0; i < options.length; i++) {
       const angle = i * arcSize;
       ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.arc(centerX, centerY, radius, angle, angle + arcSize);
-      ctx.fillStyle = colors[i % colors.length];
+      ctx.arc(0, 0, radius, angle, angle + arcSize);
+      ctx.lineTo(0, 0);
+      ctx.fillStyle = colorPops[i % colorPops.length] || '#ff007f';
       ctx.fill();
+      
+      // Separators
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
       ctx.lineWidth = 2;
-      ctx.strokeStyle = '#0f0c29';
       ctx.stroke();
 
       // Text
       ctx.save();
-      ctx.translate(centerX, centerY);
       ctx.rotate(angle + arcSize / 2);
       ctx.textAlign = 'right';
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 18px Outfit';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${Math.max(10, 24 - options.length)}px 'Outfit', sans-serif`;
       ctx.shadowColor = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur = 4;
-      // Truncate long text
-      let text = options[i];
-      if(text.length > 15) text = text.substring(0, 15) + '...';
+      
+      const text = options[i].length > 15 ? options[i].substring(0, 15) + '...' : options[i];
       ctx.fillText(text, radius - 20, 5);
       ctx.restore();
     }
+    
+    // Center dot
+    ctx.beginPath();
+    ctx.arc(0, 0, 15, 0, 2 * Math.PI);
+    ctx.fillStyle = '#1e1b4b';
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
     
     ctx.restore();
 
@@ -138,7 +150,6 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
     setIsSpinning(true);
     onResult(null);
 
-    const spinDuration = 4000;
     const spins = 5 + Math.random() * 5; 
     const targetAngle = rotation + (spins * 2 * Math.PI);
     const arcSize = (2 * Math.PI) / options.length;
@@ -148,7 +159,7 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
 
     const animate = (time) => {
       const elapsed = time - startTime;
-      const progress = Math.min(elapsed / spinDuration, 1);
+      const progress = Math.min(elapsed / spinSpeed, 1);
       
       // easeOutQuart
       const ease = 1 - Math.pow(1 - progress, 4);

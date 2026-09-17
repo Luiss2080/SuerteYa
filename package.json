@@ -1,7 +1,13 @@
 {
-  "name": "vite-temp",
+  "name": "suerteya",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "SuerteYa - escribe tus opciones, gira la ruleta, deja que la suerte decida. Sin dependencias de servidor, 100% en el navegador.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Luiss2080/ruleta-decisiones.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

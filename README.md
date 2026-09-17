@@ -1,77 +1,95 @@
 <div align="center">
-  <img src="public/favicon.svg" alt="Logo Ruleta Pro" width="120" height="120" />
-  <h1>🎡 Ruleta de Decisiones Pro</h1>
-  <p><strong>La herramienta definitiva para tomar decisiones al azar, sortear premios y gamificar tus eventos.</strong></p>
+  <img src="public/favicon.svg" alt="Logo SuerteYa" width="120" height="120" />
+  <h1>🎡 SuerteYa</h1>
+  <p><strong>Escribe tus opciones, gira la ruleta y deja que la suerte decida.</strong><br/>
+  Para grupos de amigos decidiendo dónde comer, profes sorteando turnos en clase,
+  o cualquiera que necesite una decisión al azar justa y con estilo.</p>
 
   <p>
-    <img src="https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react" alt="React" />
-    <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite" alt="Vite" />
+    <img src="https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react" alt="React" />
+    <img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite" alt="Vite" />
     <img src="https://img.shields.io/badge/Vitest-Testing-729B1B?style=flat-square&logo=vitest" alt="Vitest" />
-    <img src="https://img.shields.io/badge/Status-Production_Ready-success?style=flat-square" alt="Status" />
+    <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
   </p>
 </div>
 
 ---
 
-## ✨ Características Principales
+## Características
 
-Hemos transformado una simple ruleta en un producto robusto y lleno de funcionalidades para *Power Users*.
+Todo lo de abajo está implementado y verificado contra el código, no es una lista de aspiraciones:
 
-- 🎨 **Diseño Premium (Glassmorphism):** Interfaz moderna con efecto cristal, animaciones CSS fluidas y paletas de colores llamativas.
-- 🌗 **Sistema de Temas Dinámicos:** Cambia la apariencia al instante entre *Neon Cyberpunk*, *Sunset Candy* y *Dark Minimalist*.
-- 🔊 **Motor de Audio Nativo:** Efectos de "tick" al girar y acordes de victoria sintetizados directamente con *Web Audio API* (sin necesidad de cargar archivos MP3).
-- 🏆 **Modo Sorteo (Auto-eliminar):** Opción para que el ganador desaparezca automáticamente de la lista tras ser elegido. Ideal para rifas y clases.
-- 🕒 **Historial de Resultados:** Mantén el registro de las últimas 10 opciones ganadoras para no perder el hilo del sorteo.
-- 📤 **Data Portability (CSV):** Importa cientos de nombres en segundos subiendo un `.csv` o `.txt`, y exporta tu lista actual con un solo clic.
-- 🔗 **Generación de Enlaces (Viralidad):** Comparte tu ruleta exacta con amigos. El botón de compartir genera una URL única que codifica tus opciones y configuraciones.
-- 🖥️ **Modo Presentador:** Botón integrado de Pantalla Completa y control manual de la velocidad de giro (Rápido, Normal, Lento) para mayor suspense.
-- 💾 **Persistencia Inteligente:** Todo lo que haces (opciones, temas, historial) se guarda automáticamente en `localStorage`.
+- **Ruleta en canvas con animación real**: giro con easing (`easeOutQuart`), velocidad de giro configurable (Rápido/Normal/Lento) y selección de ganador matemáticamente uniforme (sin sesgo hacia ningún segmento - cubierto por tests, ver más abajo).
+- **Gestión de opciones completa**: agregar, quitar, importar desde `.csv`/`.txt`, exportar a `.csv`, y 3 listas predefinidas (comida, películas, "¿quién paga?").
+- **Sin duplicados, ni por mayúsculas**: "Pizza" y "pizza" se tratan como la misma opción, tanto al escribir como al importar un CSV.
+- **Persistencia automática**: opciones, tema, sonido, modo sorteo, velocidad de giro e historial se guardan en `localStorage` - cierra la pestaña y todo sigue ahí al volver.
+- **Modo Sorteo**: el ganador se elimina automáticamente de la lista tras cada giro, ideal para rifas sin repetir premios.
+- **Historial de resultados**: guarda los últimos 10 ganadores.
+- **Compartir por enlace**: genera una URL que codifica tu lista exacta de opciones para mandarle a alguien más.
+- **3 temas visuales**: Neon Cyberpunk, Sunset Candy y Dark Minimalist.
+- **Modo presentador**: pantalla completa con un botón.
+- **Audio nativo (Web Audio API)**: tick al girar y acorde de victoria sintetizados, sin archivos de audio que cargar. Se puede silenciar.
+- **Confeti** al elegir un ganador.
+- **Accesible**: el resultado y el estado de giro se anuncian a lectores de pantalla (región `aria-live`), todos los botones de solo-ícono tienen `aria-label`, los modales manejan el foco correctamente al abrir/cerrar, y toda la app es operable por teclado.
 
----
+## Cómo usar
 
-## 🚀 Inicio Rápido (Instalación Local)
+1. Agrega opciones una por una, cargá una plantilla predefinida, o importá un `.csv`/`.txt` con una opción por línea.
+2. Pulsá **"🎲 Girar Ruleta"**.
+3. El ganador se muestra en un modal y queda anotado en el historial.
+4. Opcional: activá **Modo Sorteo** en Configuración para que cada ganador se elimine automáticamente de la lista (útil para sortear varios premios sin repetir).
+5. Compartí tu ruleta exacta con el botón "Compartir Ruleta" en la barra superior.
 
-Sigue estos pasos para clonar y ejecutar el proyecto en tu máquina local.
+## Instalación y uso local
 
 ```bash
 # 1. Clona el repositorio
-git clone https://github.com/tu-usuario/ruleta-decisiones.git
-
-# 2. Navega al directorio
+git clone https://github.com/Luiss2080/ruleta-decisiones.git
 cd ruleta-decisiones
 
-# 3. Instala las dependencias
+# 2. Instala las dependencias
 npm install
 
-# 4. Inicia el servidor de desarrollo
+# 3. Servidor de desarrollo
 npm run dev
+# abre http://localhost:5173
+
+# 4. Build de producción
+npm run build
+
+# 5. Lint
+npm run lint
 ```
 
-Abre [http://localhost:5173](http://localhost:5173) en tu navegador para ver la app en acción.
+## Tecnologías
 
----
+- **React 19** + **Vite 8** (build y dev server)
+- **Canvas 2D API** para dibujar y animar la ruleta
+- **Web Audio API** para los efectos de sonido (sin archivos externos)
+- [`canvas-confetti`](https://www.npmjs.com/package/canvas-confetti) para el efecto de confeti
+- [`lucide-react`](https://lucide.dev/) para los íconos
+- **oxlint** para linting
+- **GitHub Actions** para CI (lint + test + build en cada push/PR a `main`)
 
-## 🧪 Testing Automatizado
+> Nota de precisión: este proyecto está construido con React, no en JavaScript
+> vanilla sin dependencias. Si buscás una versión sin framework, no es lo que
+> hay en este repo hoy.
 
-La lógica de negocio (renderizado inicial, agregación de opciones) está cubierta con pruebas unitarias para garantizar cero regresiones a futuro.
+## Tests
 
-Para ejecutar los tests en tu entorno de desarrollo, utiliza **Vitest**:
+Lógica pura (selección de ganador, distribución de probabilidad del giro, manejo de duplicados) cubierta con **Vitest** + **React Testing Library**, corriendo en CI para Node 20.x y 22.x:
 
 ```bash
-npm run test
+npm test
 ```
 
----
+Incluye una prueba estadística que simula 20.000 giros para 2/4/5/10 opciones y verifica que cada segmento gane aproximadamente la misma proporción de veces (ver `src/lib/wheelMath.test.js`).
 
-## 📚 Documentación Adicional
+## Documentación adicional
 
-Para más detalles sobre la operación del usuario o la arquitectura subyacente, consulta:
+- [MANUAL_DE_USO.md](./MANUAL_DE_USO.md) - guía para usuarios finales.
+- [DOCUMENTACION_TECNICA.md](./DOCUMENTACION_TECNICA.md) - arquitectura y decisiones técnicas.
 
-- 📖 [MANUAL_DE_USO.md](./MANUAL_DE_USO.md) - Guía paso a paso para usuarios finales.
-- 🛠 [DOCUMENTACION_TECNICA.md](./DOCUMENTACION_TECNICA.md) - Explicación detallada de la arquitectura, componentes y decisiones de diseño técnico.
+## Licencia
 
----
-
-<div align="center">
-  <p>Construido con ❤️ usando React y Vite. Basado en estándares de especificación SDD.</p>
-</div>
+MIT - ver [LICENSE](./LICENSE).

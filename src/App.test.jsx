@@ -21,24 +21,24 @@ HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
 describe('Ruleta Pro - App Core Logic', () => {
   it('renders initial options correctly', () => {
     render(<App />);
-    expect(screen.getByText('🎡 Ruleta Pro')).toBeInDocument();
-    
+    expect(screen.getByText('🎡 Ruleta Pro')).toBeInTheDocument();
+
     // Check default options
-    expect(screen.getByText('Pizza')).toBeInDocument();
-    expect(screen.getByText('Sushi')).toBeInDocument();
+    expect(screen.getByText('Pizza')).toBeInTheDocument();
+    expect(screen.getByText('Sushi')).toBeInTheDocument();
   });
 
   it('allows adding a new option', () => {
     render(<App />);
     const input = screen.getByPlaceholderText('Añade una opción...');
-    const addButton = screen.getByRole('button', { name: '' }); // The button with Plus icon
-    // Find button by looking at form submit
-    
+
     fireEvent.change(input, { target: { value: 'Helado' } });
-    
-    // Trigger submit via form (since button has no name, we can trigger submit on the input)
+
+    // Trigger submit via the form (the submit button has no accessible
+    // name of its own - it only renders an icon - so we submit the form
+    // directly instead of trying to look the button up by role/name).
     fireEvent.submit(input);
-    
-    expect(screen.getByText('Helado')).toBeInDocument();
+
+    expect(screen.getByText('Helado')).toBeInTheDocument();
   });
 });

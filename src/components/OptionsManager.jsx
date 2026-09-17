@@ -14,7 +14,8 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
   const handleAdd = (e) => {
     e.preventDefault();
     const trimmed = newOption.trim();
-    if (trimmed && !options.includes(trimmed)) {
+    const isDuplicate = options.some((opt) => opt.toLocaleLowerCase() === trimmed.toLocaleLowerCase());
+    if (trimmed && !isDuplicate) {
       setOptions([...options, trimmed]);
       setNewOption('');
     }
@@ -55,7 +56,17 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
     reader.onload = (evt) => {
       const text = evt.target.result;
       const parsedOpts = text.split(/\r?\n/).map(o => o.trim()).filter(Boolean);
-      const uniqueOpts = Array.from(new Set([...options, ...parsedOpts]));
+      // Dedupe case-insensitively (e.g. "Pizza" and "pizza" are the same
+      // option), keeping the first-seen casing and preserving order.
+      const seen = new Set();
+      const uniqueOpts = [];
+      for (const opt of [...options, ...parsedOpts]) {
+        const key = opt.toLocaleLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueOpts.push(opt);
+        }
+      }
       setOptions(uniqueOpts);
     };
     reader.readAsText(file);

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import confetti from 'canvas-confetti';
+import { computeWinnerIndex, randomSpinTarget } from '../lib/wheelMath';
 
 const playTickSound = () => {
   try {
@@ -139,8 +140,7 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
     setIsSpinning(true);
     onResult(null);
 
-    const spins = 5 + Math.random() * 5; 
-    const targetAngle = rotation + (spins * 2 * Math.PI);
+    const targetAngle = randomSpinTarget(rotation);
     const arcSize = (2 * Math.PI) / options.length;
     
     const startTime = performance.now();
@@ -166,9 +166,7 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
         requestAnimationFrame(animate);
       } else {
         setIsSpinning(false);
-        const normalizedRotation = currentRotation % (2 * Math.PI);
-        const index = Math.floor(((2 * Math.PI) - normalizedRotation) / arcSize) % options.length;
-        
+        const index = computeWinnerIndex(currentRotation, options.length);
         const winner = options[index];
         onResult(winner);
         if (soundEnabled) playWinSound();

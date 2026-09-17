@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 
 const playTickSound = () => {
@@ -53,21 +53,10 @@ const playWinSound = () => {
   } catch (e) { console.error('Audio play failed', e) }
 };
 
-const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnabled = true }) => {
+const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnabled = true, spinSpeed = 4000 }) => {
   const canvasRef = useRef(null);
-      gainNode.connect(audioCtxRef.current.destination);
-      
-      osc.start(startTime);
-      osc.stop(startTime + duration);
-    };
-
-    const now = audioCtxRef.current.currentTime;
-    // C Major Chord Arpeggio
-    playNote(523.25, now, 1);       // C5
-    playNote(659.25, now + 0.1, 1); // E5
-    playNote(783.99, now + 0.2, 1); // G5
-    playNote(1046.50, now + 0.3, 1.5); // C6
-  };
+  const [rotation, setRotation] = useState(0);
+  const lastTickAngleRef = useRef(0);
 
   useEffect(() => {
     drawWheel();

@@ -78,17 +78,17 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
             <option value="peliculas">Género de Película</option>
             <option value="quien_paga">¿Quién paga?</option>
           </select>
-          <button onClick={() => fileInputRef.current.click()} className="btn btn-icon" title="Importar CSV" disabled={isSpinning}>
+          <button onClick={() => fileInputRef.current.click()} className="btn btn-icon" title="Importar CSV" aria-label="Importar opciones desde CSV" disabled={isSpinning}>
             <Upload size={18} />
           </button>
           <input type="file" accept=".csv,.txt" ref={fileInputRef} onChange={importCSV} style={{ display: 'none' }} />
-          
-          <button onClick={exportCSV} className="btn btn-icon" title="Exportar CSV" disabled={options.length === 0 || isSpinning}>
+
+          <button onClick={exportCSV} className="btn btn-icon" title="Exportar CSV" aria-label="Exportar opciones a CSV" disabled={options.length === 0 || isSpinning}>
             <Download size={18} />
           </button>
 
           {options.length > 0 && (
-            <button onClick={clearAll} className="btn btn-icon" title="Borrar todo" disabled={isSpinning}>
+            <button onClick={clearAll} className="btn btn-icon" title="Borrar todo" aria-label="Borrar todas las opciones" disabled={isSpinning}>
               <Trash2 size={18} />
             </button>
           )}
@@ -104,7 +104,7 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
           onChange={(e) => setNewOption(e.target.value)}
           disabled={isSpinning}
         />
-        <button type="submit" className="btn btn-secondary" disabled={!newOption.trim() || isSpinning}>
+        <button type="submit" className="btn btn-secondary" aria-label="Añadir opción" disabled={!newOption.trim() || isSpinning}>
           <Plus size={20} />
         </button>
       </form>
@@ -133,9 +133,10 @@ const OptionsManager = ({ options, setOptions, isSpinning }) => {
               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {opt}
               </span>
-              <button 
-                className="btn btn-icon" 
+              <button
+                className="btn btn-icon"
                 onClick={() => handleRemove(i)}
+                aria-label={`Eliminar opción "${opt}"`}
                 disabled={isSpinning}
               >
                 <Trash2 size={16} />

@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import confetti from 'canvas-confetti';
+import { computeWinnerIndex, randomSpinTarget } from '../lib/wheelMath';
 
 const playTickSound = () => {
   try {
@@ -53,21 +54,10 @@ const playWinSound = () => {
   } catch (e) { console.error('Audio play failed', e) }
 };
 
-const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnabled = true }) => {
+const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnabled = true, spinSpeed = 4000 }) => {
   const canvasRef = useRef(null);
-      gainNode.connect(audioCtxRef.current.destination);
-      
-      osc.start(startTime);
-      osc.stop(startTime + duration);
-    };
-
-    const now = audioCtxRef.current.currentTime;
-    // C Major Chord Arpeggio
-    playNote(523.25, now, 1);       // C5
-    playNote(659.25, now + 0.1, 1); // E5
-    playNote(783.99, now + 0.2, 1); // G5
-    playNote(1046.50, now + 0.3, 1.5); // C6
-  };
+  const [rotation, setRotation] = useState(0);
+  const lastTickAngleRef = useRef(0);
 
   useEffect(() => {
     drawWheel();
@@ -150,8 +140,7 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
     setIsSpinning(true);
     onResult(null);
 
-    const spins = 5 + Math.random() * 5; 
-    const targetAngle = rotation + (spins * 2 * Math.PI);
+    const targetAngle = randomSpinTarget(rotation);
     const arcSize = (2 * Math.PI) / options.length;
     
     const startTime = performance.now();
@@ -177,9 +166,7 @@ const RouletteWheel = ({ options, isSpinning, setIsSpinning, onResult, soundEnab
         requestAnimationFrame(animate);
       } else {
         setIsSpinning(false);
-        const normalizedRotation = currentRotation % (2 * Math.PI);
-        const index = Math.floor(((2 * Math.PI) - normalizedRotation) / arcSize) % options.length;
-        
+        const index = computeWinnerIndex(currentRotation, options.length);
         const winner = options[index];
         onResult(winner);
         if (soundEnabled) playWinSound();

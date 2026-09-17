@@ -1,9 +1,9 @@
-# 💻 Documentación Técnica - Ruleta de Decisiones Pro
+# 💻 Documentación Técnica - SuerteYa
 
 Este documento detalla la arquitectura de la aplicación para desarrolladores y mantenedores.
 
 ## 🛠 Arquitectura y Stack Tecnológico
-- **Framework:** React 18
+- **Framework:** React 19
 - **Build Tool:** Vite
 - **Estilos:** Vanilla CSS (con CSS Variables para facilitar la creación de temas).
 - **Iconos:** `lucide-react`
@@ -14,6 +14,8 @@ Este documento detalla la arquitectura de la aplicación para desarrolladores y 
 src/
 ├── App.jsx                 # Estado global, inicialización, ruteo por URL y layout principal.
 ├── index.css               # Estilos globales, variables de tema oscuro y glassmorphism.
+├── lib/
+│   └── wheelMath.js        # Selección de ganador y cálculo del ángulo de giro (puro, sin canvas/DOM, con tests).
 └── components/
     ├── Navbar.jsx          # Barra de navegación superior con acciones globales (modales y share).
     ├── Modal.jsx           # Componente base reutilizable para ventanas emergentes.

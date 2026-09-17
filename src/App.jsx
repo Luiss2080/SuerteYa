@@ -120,11 +120,19 @@ function App() {
         options={options}
       />
 
+      {/* Screen-reader-only status announcements: the wheel result is only
+          otherwise shown visually (canvas + a modal), so without this a
+          screen reader user has no way to know the wheel is spinning or
+          who won. */}
+      <div aria-live="polite" role="status" className="sr-only">
+        {isSpinning ? 'Girando la ruleta...' : result ? `Resultado: ${result}` : ''}
+      </div>
+
       <main className="app-container">
-        <OptionsManager 
-          options={options} 
-          setOptions={setOptions} 
-          isSpinning={isSpinning} 
+        <OptionsManager
+          options={options}
+          setOptions={setOptions}
+          isSpinning={isSpinning}
         />
         
         <div style={{ display: 'flex', flexDirection: 'column' }}>

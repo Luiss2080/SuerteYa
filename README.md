@@ -1,95 +1,118 @@
 <div align="center">
-  <img src="public/favicon.svg" alt="Logo SuerteYa" width="120" height="120" />
-  <h1>🎡 SuerteYa</h1>
-  <p><strong>Escribe tus opciones, gira la ruleta y deja que la suerte decida.</strong><br/>
-  Para grupos de amigos decidiendo dónde comer, profes sorteando turnos en clase,
-  o cualquiera que necesite una decisión al azar justa y con estilo.</p>
-
+  <img src="docs/assets/logo.svg" width="96" alt="Logo de SuerteYa" />
+  <h1>SuerteYa</h1>
+  <p><b>Ruleta de decisiones en el navegador: escribe tus opciones, gira y deja que el azar decida.</b></p>
+  <img src="https://img.shields.io/badge/estado-funcional-brightgreen?style=for-the-badge" alt="Estado: funcional" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React 19" />
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 8" />
+  <img src="https://img.shields.io/badge/tests-20%20pasan-brightgreen?style=for-the-badge" alt="20 tests" />
+  <img src="https://github.com/Luiss2080/SuerteYa/actions/workflows/ci.yml/badge.svg" alt="CI" />
+  <img src="https://img.shields.io/badge/licencia-MIT-yellow?style=for-the-badge" alt="Licencia MIT" />
   <p>
-    <img src="https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react" alt="React" />
-    <img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite" alt="Vite" />
-    <img src="https://img.shields.io/badge/Vitest-Testing-729B1B?style=flat-square&logo=vitest" alt="Vitest" />
-    <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
+    <a href="#-inicio-rápido">Inicio rápido</a> ·
+    <a href="#-características">Características</a> ·
+    <a href="#-arquitectura">Arquitectura</a> ·
+    <a href="#-pruebas">Pruebas</a> ·
+    <a href="#-lo-que-todavía-no-existe">Limitaciones</a>
   </p>
 </div>
 
----
+**SuerteYa** es una aplicación web de una sola página (React + Vite) que dibuja una ruleta en canvas con las opciones que tú escribas y elige una al azar. Todo corre en el navegador y se guarda en `localStorage`. **No es** una herramienta de sorteos con verificación pública ni tiene servidor, cuentas o sincronización entre dispositivos.
 
-## Características
+## 🎬 Vista rápida
 
-Todo lo de abajo está implementado y verificado contra el código, no es una lista de aspiraciones:
+<div align="center">
+  <img src="docs/screenshots/ruleta.png" width="48%" alt="Pantalla principal de SuerteYa con la lista de opciones y la ruleta en tema Neon" />
+  <img src="docs/screenshots/resultado.png" width="48%" alt="Modal de ganador tras girar la ruleta" />
+</div>
 
-- **Ruleta en canvas con animación real**: giro con easing (`easeOutQuart`), velocidad de giro configurable (Rápido/Normal/Lento) y selección de ganador matemáticamente uniforme (sin sesgo hacia ningún segmento - cubierto por tests, ver más abajo).
-- **Gestión de opciones completa**: agregar, quitar, importar desde `.csv`/`.txt`, exportar a `.csv`, y 3 listas predefinidas (comida, películas, "¿quién paga?").
-- **Sin duplicados, ni por mayúsculas**: "Pizza" y "pizza" se tratan como la misma opción, tanto al escribir como al importar un CSV.
-- **Persistencia automática**: opciones, tema, sonido, modo sorteo, velocidad de giro e historial se guardan en `localStorage` - cierra la pestaña y todo sigue ahí al volver.
-- **Modo Sorteo**: el ganador se elimina automáticamente de la lista tras cada giro, ideal para rifas sin repetir premios.
-- **Historial de resultados**: guarda los últimos 10 ganadores.
-- **Compartir por enlace**: genera una URL que codifica tu lista exacta de opciones para mandarle a alguien más.
-- **3 temas visuales**: Neon Cyberpunk, Sunset Candy y Dark Minimalist.
-- **Modo presentador**: pantalla completa con un botón.
-- **Audio nativo (Web Audio API)**: tick al girar y acorde de victoria sintetizados, sin archivos de audio que cargar. Se puede silenciar.
-- **Confeti** al elegir un ganador.
-- **Accesible**: el resultado y el estado de giro se anuncian a lectores de pantalla (región `aria-live`), todos los botones de solo-ícono tienen `aria-label`, los modales manejan el foco correctamente al abrir/cerrar, y toda la app es operable por teclado.
+## ✨ Características
 
-## Cómo usar
+| Característica | Detalle |
+| --- | --- |
+| Ruleta en canvas | Giro animado con easing y velocidad configurable (Rápido 2 s / Normal / Lento). |
+| Ganador uniforme | La elección sale de `computeWinnerIndex` (`src/lib/wheelMath.js`); un test simula 20.000 giros por caso para comprobar que no favorece segmentos. |
+| Gestión de opciones | Agregar, quitar, importar `.csv`/`.txt` (una opción por línea), exportar `.csv` y plantillas predefinidas. |
+| Modo Sorteo | Al cerrar el modal de ganador, esa opción se elimina de la lista. |
+| Historial | Guarda los últimos 10 ganadores. |
+| Compartir | Genera un enlace con la lista en el parámetro `?opts=`. |
+| Temas | Neon Cyberpunk, Sunset Candy y Dark Minimalist. |
+| Sonido y confeti | Sonidos con Web Audio API (sin archivos de audio), silenciables; confeti con `canvas-confetti`. |
+| Persistencia | Opciones, tema, sonido, modo sorteo, velocidad e historial en `localStorage`. |
+| Accesibilidad básica | Región `aria-live` para giro/resultado y `aria-label` en botones de solo icono. |
 
-1. Agrega opciones una por una, cargá una plantilla predefinida, o importá un `.csv`/`.txt` con una opción por línea.
-2. Pulsá **"🎲 Girar Ruleta"**.
-3. El ganador se muestra en un modal y queda anotado en el historial.
-4. Opcional: activá **Modo Sorteo** en Configuración para que cada ganador se elimine automáticamente de la lista (útil para sortear varios premios sin repetir).
-5. Compartí tu ruleta exacta con el botón "Compartir Ruleta" en la barra superior.
+## 🏗️ Arquitectura
 
-## Instalación y uso local
-
-```bash
-# 1. Clona el repositorio
-git clone https://github.com/Luiss2080/ruleta-decisiones.git
-cd ruleta-decisiones
-
-# 2. Instala las dependencias
-npm install
-
-# 3. Servidor de desarrollo
-npm run dev
-# abre http://localhost:5173
-
-# 4. Build de producción
-npm run build
-
-# 5. Lint
-npm run lint
+```mermaid
+flowchart TD
+    M["main.jsx"] --> A["App.jsx (estado + localStorage)"]
+    A --> N["Navbar.jsx"]
+    A --> O["OptionsManager.jsx"]
+    A --> R["RouletteWheel.jsx (canvas + audio + confeti)"]
+    A --> D["Modal.jsx"]
+    N --> S["ShareButton.jsx"]
+    R --> W["lib/wheelMath.js (computeWinnerIndex, randomSpinTarget)"]
 ```
 
-## Tecnologías
+## 🚀 Inicio rápido
 
-- **React 19** + **Vite 8** (build y dev server)
-- **Canvas 2D API** para dibujar y animar la ruleta
-- **Web Audio API** para los efectos de sonido (sin archivos externos)
-- [`canvas-confetti`](https://www.npmjs.com/package/canvas-confetti) para el efecto de confeti
-- [`lucide-react`](https://lucide.dev/) para los íconos
-- **oxlint** para linting
-- **GitHub Actions** para CI (lint + test + build en cada push/PR a `main`)
+| Requisito | Versión |
+| --- | --- |
+| Node.js | 20 o 22 (las versiones que prueba el CI); verificado también con 24 |
+| npm | el que trae Node |
 
-> Nota de precisión: este proyecto está construido con React, no en JavaScript
-> vanilla sin dependencias. Si buscás una versión sin framework, no es lo que
-> hay en este repo hoy.
+1. Clona e instala:
+   ```bash
+   git clone https://github.com/Luiss2080/SuerteYa.git
+   cd SuerteYa
+   npm install
+   ```
+2. Arranca el servidor de desarrollo y abre la URL que imprime (Vite usa `5173` por defecto):
+   ```bash
+   npm run dev
+   ```
+3. Otros comandos:
+   ```bash
+   npm run build   # build de producción en dist/ (verificado)
+   npm run lint    # oxlint
+   ```
 
-## Tests
+<details>
+<summary>Estructura de carpetas</summary>
 
-Lógica pura (selección de ganador, distribución de probabilidad del giro, manejo de duplicados) cubierta con **Vitest** + **React Testing Library**, corriendo en CI para Node 20.x y 22.x:
+```text
+src/App.jsx                       estado global, temas, historial
+src/components/                   Navbar, OptionsManager, RouletteWheel, ShareButton, Modal
+src/lib/wheelMath.js              matemática pura de la ruleta
+.github/workflows/ci.yml          lint + test + build (Node 20.x y 22.x)
+MANUAL_DE_USO.md                  guía de usuario
+DOCUMENTACION_TECNICA.md          decisiones técnicas
+```
+
+</details>
+
+## 🧪 Pruebas
 
 ```bash
 npm test
 ```
 
-Incluye una prueba estadística que simula 20.000 giros para 2/4/5/10 opciones y verifica que cada segmento gane aproximadamente la misma proporción de veces (ver `src/lib/wheelMath.test.js`).
+**20 tests** en 3 archivos (Vitest + React Testing Library): `wheelMath.test.js` (selección de ganador y distribución), `OptionsManager.test.jsx` (opciones, duplicados) y `App.test.jsx`. Pasan todos en local. El CI ejecuta lint, tests y build en cada push/PR a `main`.
 
-## Documentación adicional
+## 🔒 Seguridad
 
-- [MANUAL_DE_USO.md](./MANUAL_DE_USO.md) - guía para usuarios finales.
-- [DOCUMENTACION_TECNICA.md](./DOCUMENTACION_TECNICA.md) - arquitectura y decisiones técnicas.
+No hay backend ni datos sensibles. La lista compartida viaja en la URL y se decodifica con `JSON.parse` dentro de un `try/catch`; solo se acepta si es un arreglo.
 
-## Licencia
+## 🚧 Lo que todavía no existe
 
-MIT - ver [LICENSE](./LICENSE).
+- Al compartir, una lista muy larga puede producir una URL demasiado larga; no hay acortador.
+- El "azar" usa `Math.random`, no una fuente criptográfica: no sirve para sorteos con validez legal.
+- Sin ganador ponderado (todas las opciones pesan igual).
+- Sin pruebas end-to-end ni de accesibilidad automatizadas.
+- `package.json` apunta al repositorio con su nombre antiguo (`ruleta-decisiones`).
+
+## 📄 Licencia
+
+MIT, ver [LICENSE](LICENSE).
+
+<div align="center"><sub>Hecho por Luiss2080 · React, Vite y mucho azar</sub></div>
